@@ -1,77 +1,56 @@
-const express = require("express");
-const mysql = require("mysql");
-const cors = require("cors");
+import express from 'express';
+import mysql from 'mysql';
+import cors from 'cors';
 
 const app = express();
-const port = 50000;
-
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 
-// DB Connection
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "movies",
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'crud',
 });
 
-// Create - Add movie
-app.post("/movies", (req, res) => {
-    const sql =
-      "INSERT INTO movies_details (`movie`, `actor`, `actress`, `director`, `producer`, `releaseDate`) VALUES (?, ?, ?, ?, ?, ?)";
-    const values = [
-      req.body.movie,
-      req.body.actor,
-      req.body.actress,
-      req.body.director,
-      req.body.producer,
-      req.body.releaseDate,
-    ];
-    db.query(sql, values, (err, result) => {
-      if (err)
-        return res.status(50000).json({ message: "Something unexpected has occurred: " + err });
-      return res.status(200).json({ success: "Movie added successfully" });
-    });
-  });
-  
-// Read - Get all movies
-app.get("/movies", (req, res) => {
-  const sql = "SELECT * FROM movie_details";
+app.get('/', (req, res) => {
+  const sql = 'SELECT * FROM movie';
   db.query(sql, (err, result) => {
-    if (err) return res.status(5000).json({ error: err });
+    if (err) {
+      console.error('Error fetching movies:', err);
+      return res.status(500).json({ message: 'Error fetching movies' });
+    }
     res.json(result);
   });
 });
 
-// Read - Get single movie (optional)
-app.get("/movies/:id", (req, res) => {
-  const sql = "SELECT * FROM movie_details WHERE id = ?";
-  db.query(sql, [req.params.id], (err, result) => {
-    if (err) return res.status(5000).json({ error: err });
-    res.json(result[0]);
+app.post('/', (req, res) => {
+  const { Movie, Actor, Director, Producer, Releasedate } = req.body;
+  const sql =
+    'INSERT INTO movie (Movie, Actor, Director, Producer, Releasedate) VALUES (?, ?, ?, ?, ?)';
+
+  db.query(sql, [Movie, Actor, Director, Producer, Releasedate], (err, result) => {
+    if (err) {
+      console.error('Error inserting movie:', err);
+      return res.status(500).json({ message: 'Failed to add movie' });
+    }
+    res.status(200).json({ message: 'Movie added successfully' });
   });
 });
 
-// Update - Edit movie
-app.put("/movies/:id", (req, res) => {
-  const { movie, actor, actress, director, producer, releaseDate } = req.body;
-  const sql = "UPDATE movie_details SET movie=?, actor=?, actress=?, director=?, producer=?, releaseDate=? WHERE id=?";
-  db.query(sql, [movie, actor, actress, director, producer, releaseDate, req.params.id], (err) => {
-    if (err) return res.status(5000).json({ error: err });
-    res.json({ message: "Movie updated successfully" });
+app.delete('/:id', (req, res) => {
+  const movieId = req.params.id;
+  const sql = 'DELETE FROM movie WHERE ID = ?';
+
+  db.query(sql, [movieId], (err, result) => {
+    if (err) {
+      console.error('Error deleting movie:', err);
+      return res.status(500).json({ message: 'Failed to delete movie' });
+    }
+    res.status(200).json({ message: 'Movie deleted successfully' });
   });
 });
 
-// Delete - Remove movie
-app.delete("/movies/:id", (req, res) => {
-  const sql = "DELETE FROM movie_details WHERE id=?";
-  db.query(sql, [req.params.id], (err) => {
-    if (err) return res.status(5000).json({ error: err });
-    res.json({ message: "Movie deleted successfully" });
-  });
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+app.listen(8081, () => {
+  console.log('Server running on http://localhost:8081');
 });

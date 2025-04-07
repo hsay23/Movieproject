@@ -7,8 +7,9 @@ const Read = () => {
 
   const getData = () => {
     axios
-      .get("http://localhost:50000/movies")
+      .get("http://localhost:8081/")
       .then((response) => {
+        console.log("Fetched data:", response.data);
         setApiData(response.data);
       })
       .catch((error) => {
@@ -20,10 +21,8 @@ const Read = () => {
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this movie?")) {
       axios
-        .delete(`http://localhost:5000/movies/${id}`)
-        .then(() => {
-          getData(); // Refresh the list after delete
-        })
+        .delete(`http://localhost:8081/${id}`)
+        .then(() => getData())
         .catch((error) => {
           console.error("Error deleting movie:", error);
           alert("Failed to delete movie.");
@@ -34,16 +33,6 @@ const Read = () => {
   useEffect(() => {
     getData();
   }, []);
-
-  const handleEdit = (movie) => {
-    localStorage.setItem("id", movie.id);
-    localStorage.setItem("movie", movie.movie);
-    localStorage.setItem("actor", movie.actor);
-    localStorage.setItem("actress", movie.actress);
-    localStorage.setItem("director", movie.director);
-    localStorage.setItem("producer", movie.producer);
-    localStorage.setItem("releaseDate", movie.releaseDate?.split("T")[0]);
-  };
 
   return (
     <div className="container mt-4">
@@ -63,7 +52,6 @@ const Read = () => {
               <th>ID</th>
               <th>Movie</th>
               <th>Actor</th>
-              <th>Actress</th>
               <th>Director</th>
               <th>Producer</th>
               <th>Release Date</th>
@@ -72,26 +60,17 @@ const Read = () => {
           </thead>
           <tbody>
             {apiData.map((movie) => (
-              <tr key={movie.id}>
-                <td>{movie.id}</td>
-                <td>{movie.movie}</td>
-                <td>{movie.actor}</td>
-                <td>{movie.actress}</td>
-                <td>{movie.director}</td>
-                <td>{movie.producer}</td>
-                <td>{movie.releaseDate?.split("T")[0]}</td>
+              <tr key={movie.ID}>
+                <td>{movie.ID}</td>
+                <td>{movie.Movie}</td>
+                <td>{movie.Actor}</td>
+                <td>{movie.Director}</td>
+                <td>{movie.Producer}</td>
+                <td>{movie.Releasedate?.split("T")[0]}</td>
                 <td>
-                  <Link to="/update">
-                    <button
-                      className="btn btn-warning btn-sm me-2"
-                      onClick={() => handleEdit(movie)}
-                    >
-                      Edit
-                    </button>
-                  </Link>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleDelete(movie.id)}
+                    onClick={() => handleDelete(movie.ID)}
                   >
                     Delete
                   </button>
