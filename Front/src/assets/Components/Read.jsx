@@ -9,7 +9,7 @@ const Read = () => {
     axios
       .get("http://localhost:8081/")
       .then((response) => {
-        console.log("Fetched data:", response.data);
+        console.log("Data Successfully fetched");
         setApiData(response.data);
       })
       .catch((error) => {
