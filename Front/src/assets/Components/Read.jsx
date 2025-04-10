@@ -9,8 +9,13 @@ const Read = () => {
     axios
       .get("http://localhost:8081/")
       .then((response) => {
-        console.log("Data Successfully fetched");
-        setApiData(response.data);
+        console.log("Data Fetched.");
+        if (Array.isArray(response.data)) {
+          setApiData(response.data);
+        } else {
+          console.error("Unexpected response format");
+          setApiData([]);
+        }
       })
       .catch((error) => {
         console.error("Error fetching movies:", error);
@@ -21,8 +26,10 @@ const Read = () => {
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this movie?")) {
       axios
-        .delete(`http://localhost:8081/${id}`)
-        .then(() => getData())
+        .delete(`http://localhost:8081/delete/${id}`)
+        .then(() => {
+          getData(); 
+        })
         .catch((error) => {
           console.error("Error deleting movie:", error);
           alert("Failed to delete movie.");
@@ -43,9 +50,9 @@ const Read = () => {
         </Link>
       </div>
 
-      {apiData.length === 0 ? (
+      {Array.isArray(apiData) && apiData.length === 0 ? (
         <p>No movies available.</p>
-      ) : (
+      ) : Array.isArray(apiData) ? (
         <table className="table table-bordered table-hover table-striped">
           <thead className="table-dark">
             <tr>
@@ -79,6 +86,8 @@ const Read = () => {
             ))}
           </tbody>
         </table>
+      ) : (
+        <p>Loading or invalid data format...</p>
       )}
     </div>
   );
